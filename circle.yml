@@ -1,6 +1,7 @@
 machine:
   environment:
     ANDROID_HOME: "/usr/local/android-sdk-linux"
+    ANDROID_NDK: "/usr/local/android-ndk"
 
 dependencies:
   override:
@@ -9,6 +10,14 @@ dependencies:
     - tar -zxf android-sdk_r24.0.2-linux.tgz -C /usr/local
     - chown -R "ubuntu:ubuntu" $ANDROID_HOME
     - rm android-sdk_r24.0.2-linux.tgz
+    # install the ndk and fb-adb
+    - wget "http://dl.google.com/android/ndk/android-ndk-r10d-linux-x86_64.bin"
+    - chmod a+x android-ndk-r10d-linux-x86_64.bin
+    - ./android-ndk-r10d-linux-x86_64.bin
+    - sudo mv android-ndk-r10d $ANDROID_NDK
+    # install fb-adb
+    - git clone --depth 1 git@github.com:facebook/fb-adb.git
+    - cd fb-adb && ./autogen.sh && mkdir build && cd build && ../configure && sudo make install
     # create an emulator avd
     - echo 'y' | android update sdk -u -a -t sys-img-armeabi-v7a-android-21 # is this the right thing?
     - echo 'no' | android create avd -n testing -t android-21 --abi "default/armeabi-v7a"
@@ -27,7 +36,7 @@ test:
         background: true
         parallel: true
     - adb wait-for-device
-    - adb devices
-    - sleep 5
+    # see if this helps actually waiting for the device to be ready...
+    - fb-adb shell echo "hello"
     - ./gradlew connectedAndroidTest
     - cp -r app/build/outputs $CIRCLE_ARTIFACTS
