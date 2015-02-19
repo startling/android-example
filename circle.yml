@@ -28,5 +28,5 @@ test:
         parallel: true
     - adb wait-for-device
     - sleep 5
-    - ./gradlew connectedAndroidTest --full-stacktrace
+    - ./gradlew connectedAndroidTest
     - cp -r app/build/outputs $CIRCLE_ARTIFACTS
