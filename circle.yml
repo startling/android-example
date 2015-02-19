@@ -32,11 +32,10 @@ dependencies:
 test:
   override:
     # start the emulator
-    - $ANDROID_HOME/tools/emulator -avd testing -no-window -no-boot-anim -no-audio:
+    - emulator -avd testing -no-audio -no-window:
         background: true
         parallel: true
-    - adb wait-for-device
-    # see if this helps actually waiting for the device to be ready...
-    - fb-adb shell echo "hello"
+    - ./circle-adb wait-for-device
     - ./gradlew connectedAndroidTest
     - cp -r app/build/outputs $CIRCLE_ARTIFACTS
+    - cp -r app/build/outputs/androidTest-results/* $CIRCLE_TEST_RESULTS

@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+
+spinstr='|/-\'
+spin_index=0
+spin_until () {
+    while ! $@
+    do
+        spin_index=$(expr $(expr $spin_index + 1) % 4)
+        printf "\r${spinstr:spin_index:1}"
+        sleep 0.5
+    done
+    printf "\r"
+}
+
+adb_shell_getprop () {
+    adb shell getprop $1 | tr -d [:space:] # delete the whitespace
+}
+
+device_actually_ready () {
+    # https://devmaze.wordpress.com/2011/12/12/starting-and-stopping-android-emulators/
+    [ "$(adb_shell_getprop init.svc.bootanim)" = "stopped" ]
+}
+
+if hash fb-adb 2>/dev/null
+then
+    ADB=fb-adb
+else
+    >&2 echo "Warning! You don't have fb-adb installed."
+    ADB=adb
+fi
+
+if [ "$1" == "wait-for-device" ]
+then
+    # wait for the device to respond to shell commands
+    spin_until $ADB shell true 2> /dev/null
+    # wait for the emulator to be completely finished booting.
+    # adb wait-for-device is not sufficient for this.
+    spin_until device_actually_ready
+elif [ "$1" = "help" ]
+then
+    echo "circle-adb, a more functional wrapper around adb for CircleCI."
+    echo ""
+    echo "Usage:"
+    echo "  $0 wait-for-device - wait for a device to actually boot."
+    echo "  $0 <adb-command>   - call out to fb-adb."
+    echo ""
+    echo "circle-adb wait-for-device is preferable to adb wait-for-device"
+    echo "  because it waits for the device to completely finish booting,"
+    echo "  rather than just waiting for it to be ready for shell access."
+    echo ""
+    echo "Calling out to fb-adb is preferable to calling out to adb"
+    echo "  since fb-adb provides a more functional shell implementation."
+    echo "  Notably, it forwards exit codes, which is important on CI platforms."
+else
+    $ADB $@
+fi
