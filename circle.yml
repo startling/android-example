@@ -1,7 +1,6 @@
 machine:
   environment:
     ANDROID_HOME: "/usr/local/android-sdk-linux"
-    ANDROID_NDK: "/usr/local/android-ndk"
 
 dependencies:
   override:
@@ -10,23 +9,11 @@ dependencies:
     - tar -zxf android-sdk_r24.0.2-linux.tgz -C /usr/local
     - chown -R "ubuntu:ubuntu" $ANDROID_HOME
     - rm android-sdk_r24.0.2-linux.tgz
-    # install the ndk and fb-adb
-    - wget "http://dl.google.com/android/ndk/android-ndk-r10d-linux-x86_64.bin"
-    - chmod a+x android-ndk-r10d-linux-x86_64.bin
-    - ./android-ndk-r10d-linux-x86_64.bin
-    - sudo mv android-ndk-r10d $ANDROID_NDK
-    # install fb-adb
-    - git clone --depth 1 git@github.com:facebook/fb-adb.git
-    - cd fb-adb && ./autogen.sh && mkdir build && cd build && ../configure && sudo make install
     # create an emulator avd
     - echo 'y' | android update sdk -u -a -t sys-img-armeabi-v7a-android-21 # is this the right thing?
     - echo 'no' | android create avd -n testing -t android-21 --abi "default/armeabi-v7a"
     # install actual dependencies
-    - echo 'y' | android update sdk -u --all --filter "build-tools-21.1.2"
-    - echo 'y' | android update sdk -u --all --filter "platform-tools-2.1.2"
-    - echo 'y' | android update sdk -u --all --filter "extra-android-support"
-    - echo 'y' | android update sdk -u --all --filter "extra-android-m2repository"
-    - echo 'y' | android update sdk -u --all --filter "extra-google-m2repository"
+    - echo 'y' | android update sdk -u --all --filter "build-tools-21.1.2,platform-tools-2.1.2,extra-android-support,extra-android-m2repository,extra-google-m2repository"
     - ./gradlew dependencies
 
 test:
@@ -35,7 +22,7 @@ test:
     - emulator -avd testing -no-audio -no-window:
         background: true
         parallel: true
-    - ./circle-adb wait-for-device
+    - ./wait.sh
     - ./gradlew connectedAndroidTest
     - cp -r app/build/outputs $CIRCLE_ARTIFACTS
     - cp -r app/build/outputs/androidTest-results/* $CIRCLE_TEST_RESULTS
