@@ -4,10 +4,10 @@ machine:
 
 dependencies:
   override:
-    # install android sdk r24.0.2
-    - wget http://dl.google.com/android/android-sdk_r24-linux.tgz
-    - tar -zxf android-sdk_r24-linux.tgz -C /usr/local
-    - rm android-sdk_r24-linux.tgz
+    # downgrade to android sdk r23
+    - wget http://dl.google.com/android/android-sdk_r23-linux.tgz
+    - tar -zxf android-sdk_r23-linux.tgz -C /usr/local
+    - rm android-sdk_r23-linux.tgz
     # install actual dependencies
     - echo 'y' | android update sdk -u --all --filter "build-tools-21.1.2,platform-tools, extra-android-support,extra-android-m2repository,extra-google-m2repository"
     # create an emulator avd
