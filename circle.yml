@@ -1,28 +1,10 @@
-machine:
-  environment:
-    ANDROID_HOME: "/usr/local/android-sdk-linux"
-
-dependencies:
-  override:
-    # downgrade to android sdk r23
-    - wget http://dl.google.com/android/android-sdk_r23-linux.tgz
-    - tar -zxf android-sdk_r23-linux.tgz -C /usr/local
-    - rm android-sdk_r23-linux.tgz
-    # install actual dependencies
-    - echo 'y' | android update sdk -u --all --filter "build-tools-21.1.2,platform-tools, extra-android-support,extra-android-m2repository,extra-google-m2repository"
-    # create an emulator avd
-    - echo 'y' | android update sdk -u -a -t sys-img-armeabi-v7a-android-21 # is this the right thing?
-    - echo 'no' | android create avd -n testing -t android-21 --abi "default/armeabi-v7a"
-    - sudo apt-get install expect-dev
-    - unbuffer ./gradlew dependencies | tee $CIRCLE_ARTIFACTS/gradle-output.txt
-
 test:
-  override:
+  post:
     # start the emulator
-    - emulator -avd testing -no-audio -no-window:
+    - emulator -avd circleci-android22 -no-audio -no-window:
         background: true
         parallel: true
     - ./circle-android wait-for-boot
-    # - ./gradlew connectedAndroidTest
-    # - cp -r app/build/outputs $CIRCLE_ARTIFACTS
-    # - cp -r app/build/outputs/androidTest-results/* $CIRCLE_TEST_RESULTS
+    - ./gradlew connectedAndroidTest
+    - cp -r app/build/outputs $CIRCLE_ARTIFACTS
+    - cp -r app/build/outputs/androidTest-results/* $CIRCLE_TEST_REPORTS
