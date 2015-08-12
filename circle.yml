@@ -1,10 +1,10 @@
 test:
-  post:
+  override:
     # start the emulator
     - emulator -avd circleci-android22 -no-audio -no-window:
         background: true
         parallel: true
-    - ./circle-android wait-for-boot
+    - circle-android wait-for-boot
     - ./gradlew connectedAndroidTest
     - cp -r app/build/outputs $CIRCLE_ARTIFACTS
     - cp -r app/build/outputs/androidTest-results/* $CIRCLE_TEST_REPORTS

@@ -8,7 +8,7 @@ import android.test.InstrumentationTestCase;
 public class ExampleTest extends InstrumentationTestCase {
     public void test() throws Exception {
         final int expected = 5;
-        final int actual = 3;
+        final int actual = 5;
         assertEquals(expected, actual);
     }
 }
